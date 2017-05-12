@@ -4,7 +4,9 @@ import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.media.MediaCodec;
 import android.os.Build;
+import android.view.Surface;
 import android.view.SurfaceView;
+import android.view.TextureView;
 import com.pedro.encoder.audio.AudioEncoder;
 import com.pedro.encoder.audio.GetAccData;
 import com.pedro.encoder.input.audio.GetMicrophoneData;
@@ -37,6 +39,17 @@ public class RtspBuilder implements GetAccData, GetCameraData, GetH264Data, GetM
 
   private RtspClient rtspClient;
   private boolean videoEnabled = true;
+
+  public RtspBuilder(TextureView surfaceView, Protocol protocol,
+      ConnectCheckerRtsp connectCheckerRtsp) {
+    rtspClient = new RtspClient(connectCheckerRtsp, protocol);
+
+    cameraManager = new Camera1ApiManager(surfaceView, this);
+    videoEncoder = new VideoEncoder(this);
+    microphoneManager = new MicrophoneManager(this);
+    audioEncoder = new AudioEncoder(this);
+    streaming = false;
+  }
 
   public RtspBuilder(SurfaceView surfaceView, Protocol protocol,
       ConnectCheckerRtsp connectCheckerRtsp) {
@@ -196,4 +209,8 @@ public class RtspBuilder implements GetAccData, GetCameraData, GetH264Data, GetM
     videoEncoder.inputNv21Data(buffer);
   }
 
+  @Override
+  public void getSurface(Surface surface) {
+    videoEncoder.setTextureViewSurface(surface);
+  }
 }

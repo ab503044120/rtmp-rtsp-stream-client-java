@@ -1,8 +1,8 @@
 package com.pedro.rtmpstreamer.defaultexample;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.SurfaceView;
+import android.support.v7.app.AppCompatActivity;
+import android.view.TextureView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -30,11 +30,11 @@ public class ExampleRtspActivity extends AppCompatActivity
     super.onCreate(savedInstanceState);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.activity_example_rtsp);
-    SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+    TextureView textureView = (TextureView) findViewById(R.id.asd);
     button = (Button) findViewById(R.id.b_start_stop);
     button.setOnClickListener(this);
     etUrl = (EditText) findViewById(R.id.et_rtsp_url);
-    rtspBuilder = new RtspBuilder(surfaceView, Protocol.UDP, this);
+    rtspBuilder = new RtspBuilder(textureView, Protocol.UDP, this);
   }
 
   @Override

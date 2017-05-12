@@ -39,7 +39,8 @@ public class VideoEncoder implements GetCameraData {
   private boolean spsPpsSetted = false;
 
   //surface to buffer encoder
-  private Surface inputSurface;
+  private Surface inputSurface, textureViewSurface;
+  private Thread threadSurfaceRender;
   //buffer to buffer
   private BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(20);
   private int imageFormat = ImageFormat.NV21;
@@ -152,6 +153,10 @@ public class VideoEncoder implements GetCameraData {
     }
   }
 
+  public void setTextureViewSurface(Surface textureViewSurface) {
+    this.textureViewSurface = textureViewSurface;
+  }
+
   public Surface getInputSurface() {
     return inputSurface;
   }
@@ -229,6 +234,15 @@ public class VideoEncoder implements GetCameraData {
   public void stop() {
     running = false;
     queue.clear();
+    if (threadSurfaceRender != null) {
+      threadSurfaceRender.interrupt();
+      try {
+        threadSurfaceRender.join();
+      } catch (InterruptedException e) {
+        threadSurfaceRender.interrupt();
+      }
+      threadSurfaceRender = null;
+    }
     if (thread != null) {
       thread.interrupt();
       try {
@@ -268,6 +282,28 @@ public class VideoEncoder implements GetCameraData {
         Log.e(TAG, "frame discarded, cant add more frames: ", e);
       }
     }
+  }
+
+  @Override
+  public void getSurface(Surface surface) {
+    threadSurfaceRender = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        while (!Thread.interrupted()) {
+          Canvas canvas;
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            canvas = textureViewSurface.lockHardwareCanvas();
+            inputSurface.lockHardwareCanvas();
+          } else {
+            canvas = textureViewSurface.lockCanvas(null);
+            inputSurface.lockCanvas(null);
+          }
+          inputSurface.unlockCanvasAndPost(canvas);
+          textureViewSurface.unlockCanvas(canvas);
+        }
+      }
+    });
+    threadSurfaceRender.start();
   }
 
   @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

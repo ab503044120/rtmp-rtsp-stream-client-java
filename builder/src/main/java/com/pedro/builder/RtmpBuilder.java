@@ -4,6 +4,7 @@ import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.media.MediaCodec;
 import android.os.Build;
+import android.view.Surface;
 import android.view.SurfaceView;
 import com.pedro.encoder.audio.AudioEncoder;
 import com.pedro.encoder.audio.GetAccData;
@@ -186,5 +187,10 @@ public class RtmpBuilder implements GetAccData, GetCameraData, GetH264Data, GetM
   @Override
   public void inputNv21Data(byte[] buffer) {
     videoEncoder.inputNv21Data(buffer);
+  }
+
+  @Override
+  public void getSurface(Surface surface) {
+    videoEncoder.setTextureViewSurface(surface);
   }
 }
